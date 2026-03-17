@@ -4,12 +4,14 @@ type Query {
   """
   getSavedCart(userId: String!, nullOnEmpty: Boolean, userType: String): String
     @cacheControl(scope: PUBLIC, maxAge: ZERO)
+    @auth(scope: PUBLIC)
 
   """
   Retrieve app settings
   """
   getAppSettings: CrossDeviceCartSettings
     @cacheControl(scope: PUBLIC, maxAge: SHORT)
+    @auth(scope: PUBLIC)
 }
 
 type Mutation {
@@ -17,6 +19,7 @@ type Mutation {
   Stores an OrderForm ID for a specific user, as a cross cart reference.
   """
   saveCurrentCart(userId: String!, orderFormId: String, userType: String): String
+    @auth(scope: PUBLIC)
   """
   Replaces current cart with a saved cart. Optionally, you can request that both list of items be merged.
   """
@@ -26,9 +29,11 @@ type Mutation {
     strategy: Strategy!
     userType: String
   ): OrderForm
+    @auth(scope: PUBLIC)
 
   """
   Save app settings
   """
   saveAppSettings(settings: SaveSettings): Boolean
+    @auth(scope: PUBLIC)
 }

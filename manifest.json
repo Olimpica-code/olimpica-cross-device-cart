@@ -1,16 +1,16 @@
 {
-  "vendor": "vtex",
+  "vendor": "olimpica",
   "name": "cross-device-cart",
-  "version": "1.5.1",
+  "version": "0.1.0",
   "title": "Cross device cart",
-  "description": "Seamlessly allow a client to retrieve items left on a different device's cart",
+  "description": "Persistencia del carrito de compras o tambien Card Recovery",
   "builders": {
     "admin": "0.x",
     "react": "3.x",
     "docs": "0.x",
     "store": "0.x",
     "node": "6.x",
-    "graphql": "1.x",
+    "graphql": "2.x",
     "messages": "1.x"
   },
   "dependencies": {
