@@ -1,0 +1,18 @@
+/* Sobrescribe tema sin tocar el store-theme: botón nativo del banner */
+:global([class*='cartRecoveredBannerViewCart']) {
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+:global([class*='cartRecoveredBannerViewCart']):hover {
+  filter: brightness(0.92);
+}
+
+:global([class*='cartRecoveredBannerViewCart']):active {
+  filter: brightness(0.85);
+}
+
+/* Botón X (Styleguide): sin fondo al hover */
+:global([class*='cartRecoveredBannerDismiss']) :global(button):hover,
+:global([class*='cartRecoveredBannerDismiss']) :global(.vtex-button):hover {
+  background-color: initial !important;
+}

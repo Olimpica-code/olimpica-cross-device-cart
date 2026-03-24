@@ -9,6 +9,7 @@ import GET_ID_BY_USER from '../graphql/getSavedCart.gql'
 import SAVE_ID_BY_USER from '../graphql/saveCurrentCart.gql'
 import MUTATE_CART from '../graphql/replaceCart.gql'
 import ChallengeBlock from './ChallengeBlock'
+import CartRecoveredBanner from './CartRecoveredBanner'
 import insertRootPath from '../utils/insertRootPath'
 
 interface Props {
@@ -30,6 +31,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
 
   const [hasMerged, setMergeStatus] = useState(false)
   const [challengeActive, setChallenge] = useState(false)
+  const [recoveredBannerVisible, setRecoveredBannerVisible] = useState(false)
   const intl = useIntl()
 
   const hasItems = orderForm.items.length
@@ -126,14 +128,13 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
 
     challengeActive && setChallenge(false)
 
-    showToast({
-      message: intl.formatMessage({ id: 'store/crossCart.toast.success' }),
-    })
+    setRecoveredBannerVisible(true)
 
     getSavedCart({
       variables: {
         userId,
         nullOnEmpty: !isAutomatic,
+        userType,
       },
     })
   }
@@ -182,16 +183,19 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, data, hasItems, initialFetchComplete, orderForm.id])
 
-  if (!challengeActive || isAutomatic) {
-    return null
-  }
-
   return (
-    <ChallengeBlock
-      handleAccept={handleMerge}
-      handleDecline={handleDeclineMerge}
-      mutationLoading={mutationLoading}
-    />
+    <>
+      {recoveredBannerVisible && (
+        <CartRecoveredBanner onDismiss={() => setRecoveredBannerVisible(false)} />
+      )}
+      {challengeActive && !isAutomatic && (
+        <ChallengeBlock
+          handleAccept={handleMerge}
+          handleDecline={handleDeclineMerge}
+          mutationLoading={mutationLoading}
+        />
+      )}
+    </>
   )
 }
 

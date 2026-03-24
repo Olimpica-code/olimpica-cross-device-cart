@@ -2,5 +2,8 @@
   "store/crossCart.challenge.cta": "Recuperar",
   "store/crossCart.challenge.text": "Sembla que has deixat productes a la cistella d'un altre dispositiu. Vols recuperar-los?",
   "store/crossCart.toast.success": "Els productes s'han afegit a la cistella",
-  "store/crossCart.toast.error": "Hi ha hagut un error a l'afegir els productes"
+  "store/crossCart.toast.error": "Hi ha hagut un error a l'afegir els productes",
+  "store/crossCart.recovered.title": "Hem recuperat la teva cistella",
+  "store/crossCart.recovered.subtitle": "on la vas deixar.",
+  "store/crossCart.recovered.viewCart": "Veure cistella"
 }
