@@ -1,3 +1,13 @@
-query getSavedCart($userId: String!, $nullOnEmpty: Boolean, $userType: String) {
-  id: getSavedCart(userId: $userId, nullOnEmpty: $nullOnEmpty, userType: $userType)
+query getSavedCart(
+  $userId: String!
+  $nullOnEmpty: Boolean
+  $userType: String
+  $salesChannel: String
+) {
+  id: getSavedCart(
+    userId: $userId
+    nullOnEmpty: $nullOnEmpty
+    userType: $userType
+    salesChannel: $salesChannel
+  )
 }

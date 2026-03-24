@@ -1,4 +1,5 @@
 import { mergeItems } from '../utils'
+import { commercialBucketFromSalesChannel } from '../utils/commercialBucket'
 
 /**
  * Cross cart main feature
@@ -16,7 +17,23 @@ export const replaceCart = async (
     response,
   } = context
 
-  if( userType != "CALL_CENTER_OPERATOR") {
+  if (userType != 'CALL_CENTER_OPERATOR') {
+    try {
+      const savedSc = await checkoutIO.getOrderFormSalesChannel(savedCart)
+      const currentSc = await checkoutIO.getOrderFormSalesChannel(currentCart)
+
+      if (
+        savedSc != null &&
+        currentSc != null &&
+        commercialBucketFromSalesChannel(savedSc) !==
+          commercialBucketFromSalesChannel(currentSc)
+      ) {
+        return null
+      }
+    } catch {
+      /* Sin lectura de canal no bloqueamos el merge (compatibilidad con APIs antiguas) */
+    }
+
     const host = context.get('x-forwarded-host')
 
     response.set(

@@ -1,3 +1,13 @@
-mutation saveCurrentCart($userId: String!, $orderFormId: String, $userType: String) {
-  saveCurrentCart(userId: $userId, orderFormId: $orderFormId, userType: $userType)
+mutation saveCurrentCart(
+  $userId: String!
+  $orderFormId: String
+  $userType: String
+  $salesChannel: String
+) {
+  saveCurrentCart(
+    userId: $userId
+    orderFormId: $orderFormId
+    userType: $userType
+    salesChannel: $salesChannel
+  )
 }

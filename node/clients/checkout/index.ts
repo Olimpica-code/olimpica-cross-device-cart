@@ -10,6 +10,7 @@ import { ItemInput } from 'vtex.checkout-graphql'
 import {
   GET_ORDERFORM_ITEMS_QUERY,
   GET_ORDERFORM_QUERY,
+  GET_ORDERFORM_SALES_CHANNEL_QUERY,
   ADD_ITEMS_MUTATION,
 } from './queries'
 
@@ -50,6 +51,30 @@ export default class CheckoutIO extends AppGraphQLClient {
    * @param {string} orderFormId OrderForm ID
    * @return {PartialItem[]} List of partial Items
    */
+  public getOrderFormSalesChannel = async (
+    orderFormId: string
+  ): Promise<string | null> => {
+    const result = await this.graphql
+      .query<
+        { orderForm: { id: string; salesChannel: string | null } | null },
+        { orderFormId: string }
+      >(
+        {
+          query: GET_ORDERFORM_SALES_CHANNEL_QUERY,
+          variables: { orderFormId },
+        },
+        { metric: 'checkout-orderform-sales-channel' }
+      )
+      .then(
+        throwOnGraphQLErrors(
+          'Error getting salesChannel from vtex.checkout-graphql'
+        )
+      )
+      .then((q) => q.data?.orderForm?.salesChannel ?? null)
+
+    return result
+  }
+
   public getItems = async (orderFormId: string): Promise<PartialItem[]> => {
     const partialItems = await this.graphql
       .query<PartialOrderFormItems, { orderFormId: string }>(

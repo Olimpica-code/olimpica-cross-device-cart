@@ -35,6 +35,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   const intl = useIntl()
 
   const hasItems = orderForm.items.length
+  const salesChannel = orderForm.salesChannel
 
   const [getSavedCart, { data, loading }] = useLazyQuery<
     CrossCartData,
@@ -50,16 +51,20 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
     ReplaceCartVariables
   >(MUTATE_CART)
 
+  /* No esperar initialFetchComplete ni orderForm.id: si no, data queda undefined y el otro effect nunca guarda referencia */
   useEffect(() => {
+    if (!userId) return
+
     getSavedCart({
       variables: {
         userId,
         nullOnEmpty: !isAutomatic,
-        userType
+        userType,
+        salesChannel: salesChannel ?? undefined,
       },
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, isAutomatic, userType, salesChannel])
 
   const handleDeclineMerge = async () => {
     challengeActive && setChallenge(false)
@@ -68,7 +73,8 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
       variables: {
         userId,
         orderFormId: hasItems ? orderForm.id : null,
-        userType
+        userType,
+        salesChannel: salesChannel ?? undefined,
       },
     })
   }
@@ -135,6 +141,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         userId,
         nullOnEmpty: !isAutomatic,
         userType,
+        salesChannel: salesChannel ?? undefined,
       },
     })
   }
@@ -155,7 +162,8 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         variables: {
           userId,
           orderFormId: orderForm.id,
-          userType
+          userType,
+          salesChannel: salesChannel ?? undefined,
         },
       })
 
@@ -176,12 +184,23 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         variables: {
           userId,
           orderFormId: null,
-          userType
+          userType,
+          salesChannel: salesChannel ?? undefined,
         },
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, data, hasItems, initialFetchComplete, orderForm.id])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- saveCurrentCart / handleMerge omitidos a propósito (evitar bucles)
+  }, [
+    loading,
+    data,
+    hasItems,
+    initialFetchComplete,
+    orderForm.id,
+    salesChannel,
+    userId,
+    userType,
+    isAutomatic,
+  ])
 
   return (
     <>

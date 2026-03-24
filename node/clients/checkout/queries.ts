@@ -1,3 +1,12 @@
+export const GET_ORDERFORM_SALES_CHANNEL_QUERY = `
+query orderFormSalesChannel($orderFormId: ID) {
+  orderForm(orderFormId: $orderFormId) {
+    id
+    salesChannel
+  }
+}
+`
+
 export const GET_ORDERFORM_ITEMS_QUERY = `
 query orderForm($orderFormId: ID) {
   orderForm(orderFormId: $orderFormId) {

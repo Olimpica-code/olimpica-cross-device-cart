@@ -13,6 +13,8 @@ interface ToastParam {
 interface PartialOrderForm {
   id: string
   items: any[]
+  /** Canal de ventas del orderForm (VTEX); usado para separar carritos cross-device por política. */
+  salesChannel?: string
 }
 
 interface ReplaceCartVariables {
@@ -30,12 +32,14 @@ interface CrossCartVars {
   userId: string
   nullOnEmpty?: boolean
   userType?: string
+  salesChannel?: string | null
 }
 
 interface NewCrossCart {
   userId: string
-  orderFormId: string | null,
+  orderFormId: string | null
   userType?: string
+  salesChannel?: string | null
 }
 
 type NewOrderForm = { [key: string]: any }
