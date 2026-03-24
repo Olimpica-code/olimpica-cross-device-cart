@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { FormattedMessage } from 'react-intl'
 import { ButtonWithIcon, IconClose } from 'vtex.styleguide'
 
@@ -16,6 +16,10 @@ const CART_ICON_PATH = '/arquivos/shopping_cart_FILL0_wght500_GRAD0_opsz48.svg'
 /** Azul marca (mismo tono que “Ver carrito” / icono en diseño Olimpica). */
 const BRAND_BLUE = '#005CA9'
 const BANNER_RADIUS = '8px'
+/** Ancho máximo en desktop para evitar barra demasiado ancha con justify-around */
+const BANNER_MAX_WIDTH_DESKTOP = '640px'
+const AUTO_DISMISS_MS = 5000
+const FADE_OUT_MS = 400
 
 const messageTextStyle: React.CSSProperties = {
   fontSize: '12px',
@@ -48,6 +52,35 @@ const CartRecoveredBanner: FC<Props> = ({ onDismiss }) => {
   const { rootPath = '' } = useRuntime()
   const isPhone = device === 'phone'
   const cartIconSrc = insertRootPath(rootPath, CART_ICON_PATH)
+  const autoDismissTimerRef = useRef<number | undefined>(undefined)
+  const [isFadingOut, setIsFadingOut] = useState(false)
+
+  const clearAutoDismissTimer = useCallback(() => {
+    if (autoDismissTimerRef.current !== undefined) {
+      window.clearTimeout(autoDismissTimerRef.current)
+      autoDismissTimerRef.current = undefined
+    }
+  }, [])
+
+  const dismissWithoutFade = useCallback(() => {
+    clearAutoDismissTimer()
+    onDismiss()
+  }, [clearAutoDismissTimer, onDismiss])
+
+  useEffect(() => {
+    autoDismissTimerRef.current = window.setTimeout(() => {
+      autoDismissTimerRef.current = undefined
+      setIsFadingOut(true)
+    }, AUTO_DISMISS_MS)
+    return () => clearAutoDismissTimer()
+  }, [clearAutoDismissTimer])
+
+  const handleBannerTransitionEnd = (
+    e: React.TransitionEvent<HTMLDivElement>
+  ) => {
+    if (e.propertyName !== 'opacity' || !isFadingOut) return
+    onDismiss()
+  }
 
   const handleViewCart = () => {
     push({
@@ -55,7 +88,7 @@ const CartRecoveredBanner: FC<Props> = ({ onDismiss }) => {
       event: 'addToCart',
       items: [],
     })
-    onDismiss()
+    dismissWithoutFade()
   }
 
   return (
@@ -63,17 +96,20 @@ const CartRecoveredBanner: FC<Props> = ({ onDismiss }) => {
       className={`${handles.cartRecoveredBanner} fixed left-0 right-0 ph4-ns`}
       style={{
         top: isPhone ? '4.5rem' : '5.5rem',
-        pointerEvents: 'auto',
+        pointerEvents: isFadingOut ? 'none' : 'auto',
         zIndex: 10000,
+        opacity: isFadingOut ? 0 : 1,
+        transition: `opacity ${FADE_OUT_MS}ms ease-out`,
       }}
+      onTransitionEnd={handleBannerTransitionEnd}
     >
       <div
-        className={`${handles.cartRecoveredBannerInner} mw7 center bg-base br3 shadow-1 ba b--muted-4 flex items-center justify-around pa3 ph4-ns`}
+        className={`${handles.cartRecoveredBannerInner} center bg-base br3 shadow-1 ba b--muted-4 flex items-center justify-around pa3 ph4-ns`}
         style={{
           flexDirection: 'row',
           flexWrap: 'nowrap',
           width: '100%',
-          maxWidth: '90%',
+          maxWidth: isPhone ? '90%' : BANNER_MAX_WIDTH_DESKTOP,
           marginLeft: 'auto',
           marginRight: 'auto',
         }}
@@ -159,7 +195,7 @@ const CartRecoveredBanner: FC<Props> = ({ onDismiss }) => {
               variation="tertiary"
               size="small"
               icon={closeIcon}
-              onClick={onDismiss}
+              onClick={dismissWithoutFade}
             />
           </div>
         </div>
