@@ -8,6 +8,11 @@
 
 The Cross Device Cart app keeps a user’s shopping cart synchronized across devices, allowing logged-in users to restore their cart from their most recent session.
 
+## Mobile integration (React Native)
+
+- Technical guide: `docs/react-native-integration.md`
+- Postman collection: `postman/olimpica-cross-device-cart.postman_collection.json`
+
 ## Configuration
 
 1.  Install the app and then import it to your theme's peer dependencies in `manifest.json`,

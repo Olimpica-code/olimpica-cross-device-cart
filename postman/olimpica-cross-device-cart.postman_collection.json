@@ -1,0 +1,157 @@
+{
+  "info": {
+    "name": "Olimpica Cross Device Cart",
+    "_postman_id": "6a0a6d4e-a5e8-4f88-b340-4c2f62aaf001",
+    "description": "Coleccion minima para integrar Cross Device Cart desde web o app mobile.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "account", "value": "olimpica" },
+    { "key": "workspace", "value": "harm5" },
+    { "key": "appId", "value": "olimpica.cross-device-cart@0.1.0" },
+    { "key": "vtexToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "userType", "value": "STORE_USER" },
+    { "key": "currentOrderFormId", "value": "" },
+    { "key": "savedOrderFormId", "value": "" },
+    { "key": "strategy", "value": "REPLACE" }
+  ],
+  "item": [
+    {
+      "name": "Get App Settings",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "VtexIdclientAutCookie", "value": "{{vtexToken}}" },
+          { "key": "X-Vtex-Use-Https", "value": "true" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query getAppSettings { settings: getAppSettings { isAutomatic strategy } }\",\n  \"variables\": {}\n}"
+        },
+        "url": {
+          "raw": "https://{{workspace}}--{{account}}.myvtex.com/_v/private/graphql/v1?app={{appId}}",
+          "protocol": "https",
+          "host": [
+            "{{workspace}}--{{account}}",
+            "myvtex",
+            "com"
+          ],
+          "path": [
+            "_v",
+            "private",
+            "graphql",
+            "v1"
+          ],
+          "query": [
+            { "key": "app", "value": "{{appId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Saved Cart",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "VtexIdclientAutCookie", "value": "{{vtexToken}}" },
+          { "key": "X-Vtex-Use-Https", "value": "true" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query getSavedCart($userId: String!, $nullOnEmpty: Boolean, $userType: String) { id: getSavedCart(userId: $userId, nullOnEmpty: $nullOnEmpty, userType: $userType) }\",\n  \"variables\": {\n    \"userId\": \"{{userId}}\",\n    \"nullOnEmpty\": true,\n    \"userType\": \"{{userType}}\"\n  }\n}"
+        },
+        "url": {
+          "raw": "https://{{workspace}}--{{account}}.myvtex.com/_v/private/graphql/v1?app={{appId}}",
+          "protocol": "https",
+          "host": [
+            "{{workspace}}--{{account}}",
+            "myvtex",
+            "com"
+          ],
+          "path": [
+            "_v",
+            "private",
+            "graphql",
+            "v1"
+          ],
+          "query": [
+            { "key": "app", "value": "{{appId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Save Current Cart",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "VtexIdclientAutCookie", "value": "{{vtexToken}}" },
+          { "key": "X-Vtex-Use-Https", "value": "true" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation saveCurrentCart($userId: String!, $orderFormId: String, $userType: String) { saveCurrentCart(userId: $userId, orderFormId: $orderFormId, userType: $userType) }\",\n  \"variables\": {\n    \"userId\": \"{{userId}}\",\n    \"orderFormId\": \"{{currentOrderFormId}}\",\n    \"userType\": \"{{userType}}\"\n  }\n}"
+        },
+        "url": {
+          "raw": "https://{{workspace}}--{{account}}.myvtex.com/_v/private/graphql/v1?app={{appId}}",
+          "protocol": "https",
+          "host": [
+            "{{workspace}}--{{account}}",
+            "myvtex",
+            "com"
+          ],
+          "path": [
+            "_v",
+            "private",
+            "graphql",
+            "v1"
+          ],
+          "query": [
+            { "key": "app", "value": "{{appId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Replace Cart",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "VtexIdclientAutCookie", "value": "{{vtexToken}}" },
+          { "key": "X-Vtex-Use-Https", "value": "true" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation replaceCart($savedCart: String!, $currentCart: String!, $strategy: Strategy!, $userType: String) { newOrderForm: replaceCart(savedCart: $savedCart, currentCart: $currentCart, strategy: $strategy, userType: $userType) }\",\n  \"variables\": {\n    \"savedCart\": \"{{savedOrderFormId}}\",\n    \"currentCart\": \"{{currentOrderFormId}}\",\n    \"strategy\": \"{{strategy}}\",\n    \"userType\": \"{{userType}}\"\n  }\n}"
+        },
+        "url": {
+          "raw": "https://{{workspace}}--{{account}}.myvtex.com/_v/private/graphql/v1?app={{appId}}",
+          "protocol": "https",
+          "host": [
+            "{{workspace}}--{{account}}",
+            "myvtex",
+            "com"
+          ],
+          "path": [
+            "_v",
+            "private",
+            "graphql",
+            "v1"
+          ],
+          "query": [
+            { "key": "app", "value": "{{appId}}" }
+          ]
+        }
+      }
+    }
+  ]
+}
