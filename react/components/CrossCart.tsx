@@ -64,7 +64,6 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   if (!initialFetchComplete || !userId) return
 
   const handleVisibilityChange = async () => {
-    console.log("entro a handlevisibilityChange", document)
     if (document.visibilityState !== 'visible') return
 
       try {
