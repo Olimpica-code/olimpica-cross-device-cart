@@ -5,6 +5,8 @@
   "store/crossCart.toast.error": "An error occurred while retrieving your cart",
   "store/crossCart.recovered.title": "We've picked up your cart",
   "store/crossCart.recovered.subtitle": "where you left it.",
+   "store/crossCart.merge.title": "We join your cart",
+  "store/crossCart.merge.subtitle": "So you'll keep buying.",
   "store/crossCart.recovered.viewCart": "View cart",
   "admin/cross-device-cart.title": "Cross Device Cart",
   "admin/cross-device-cart.subtitle": "App Settings",

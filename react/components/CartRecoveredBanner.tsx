@@ -40,12 +40,13 @@ const CSS_HANDLES = [
 ] as const
 
 interface Props {
-  onDismiss: () => void
+  onDismiss: () => void,
+  type: 'retomar' | 'unir'
 }
 
 const closeIcon = <IconClose />
 
-const CartRecoveredBanner: FC<Props> = ({ onDismiss }) => {
+const CartRecoveredBanner: FC<Props> = ({ onDismiss, type }) => {
   const { push } = usePixel()
   const handles = useCssHandles(CSS_HANDLES)
   const { device } = useDevice()
@@ -150,13 +151,13 @@ const CartRecoveredBanner: FC<Props> = ({ onDismiss }) => {
             className={`${handles.cartRecoveredBannerTitle} fw6`}
             style={messageTextStyle}
           >
-            <FormattedMessage id="store/crossCart.recovered.title" />
+            <FormattedMessage id={type === 'unir' ? "store/crossCart.merge.title" :"store/crossCart.recovered.title" } />
           </div>
           <div
             className={`${handles.cartRecoveredBannerSubtitle} mt1 c-muted-1`}
             style={messageTextStyle}
           >
-            <FormattedMessage id="store/crossCart.recovered.subtitle" />
+            <FormattedMessage id={type === 'unir' ? "store/crossCart.merge.subtitle" : "store/crossCart.recovered.subtitle"} />
           </div>
         </div>
         <div

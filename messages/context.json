@@ -5,6 +5,8 @@
   "store/crossCart.toast.error": "Toast message for error while adding items",
   "store/crossCart.recovered.title": "Banner title after cart recovery",
   "store/crossCart.recovered.subtitle": "Banner subtitle after cart recovery",
+   "store/crossCart.merge.title": "Banner title after cart recovery",
+  "store/crossCart.merge.subtitle": "Banner subtitle after cart recovery",
   "store/crossCart.recovered.viewCart": "CTA button to open minicart",
   "admin/cross-device-cart.title": "Admin panel title",
   "admin/cross-device-cart.subtitle": "Admin panel subtitle",

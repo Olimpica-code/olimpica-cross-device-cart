@@ -23,7 +23,7 @@ interface ReplaceCartVariables {
 }
 
 interface CrossCartData {
-  id: string
+  id: string,
 }
 
 interface CrossCartVars {

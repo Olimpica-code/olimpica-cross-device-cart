@@ -5,5 +5,7 @@
   "store/crossCart.toast.error": "Ocorreu um erro ao adicionar seus itens",
   "store/crossCart.recovered.title": "Retomamos seu carrinho",
   "store/crossCart.recovered.subtitle": "de compras para você.",
+   "store/crossCart.merge.title": "Combinamos seus carrinhos de compras",
+  "store/crossCart.merge.subtitle": "Então você continuará comprando.",
   "store/crossCart.recovered.viewCart": "Ver carrinho"
 }

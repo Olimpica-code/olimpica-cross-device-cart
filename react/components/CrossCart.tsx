@@ -32,10 +32,10 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   const [hasMerged, setMergeStatus] = useState(false)
   const [challengeActive, setChallenge] = useState(false)
   const [recoveredBannerVisible, setRecoveredBannerVisible] = useState(false)
+  const [recoveryType, setRecoveryType] = useState<'retomar' | 'unir'>('retomar')
   const intl = useIntl()
 
   const hasItems = orderForm.items.length
-
   const [getSavedCart, { data, loading }] = useLazyQuery<
     CrossCartData,
     CrossCartVars
@@ -49,7 +49,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
     NewOrderForm | null,
     ReplaceCartVariables
   >(MUTATE_CART)
-
+  
   useEffect(() => {
     getSavedCart({
       variables: {
@@ -59,8 +59,36 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
       },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [orderForm.id, userId])
+  useEffect(() => {
+  if (!initialFetchComplete || !userId) return
 
+  const handleVisibilityChange = async () => {
+    console.log("entro a handlevisibilityChange", document)
+    if (document.visibilityState !== 'visible') return
+
+      try {
+        const response = await axios.get(
+          insertRootPath(rootPath, `/api/checkout/pub/orderForm/${orderForm.id}`)
+        )
+        const updatedOrderForm = response.data
+        if (updatedOrderForm.items.length > orderForm.items.length) {
+          setOrderForm(updatedOrderForm)
+          setRecoveryType('retomar')
+          setRecoveredBannerVisible(true)
+        }
+      } catch (e) {
+        console.error('Error al refrescar orderForm:', e)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleVisibilityChange)
+    return () => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  window.removeEventListener('focus', handleVisibilityChange)
+}
+  }, [initialFetchComplete, userId, orderForm.id, orderForm.items.length])
   const handleDeclineMerge = async () => {
     challengeActive && setChallenge(false)
 
@@ -75,9 +103,9 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
 
   const handleMerge = async () => {
     if (!data?.id || hasMerged) return
-
+    const isUnion = orderForm.items.length > 0
+    setRecoveryType(isUnion ? 'unir' : 'retomar')
     setMergeStatus(true)
-
     const mutationResult = await replaceCart({
       variables: {
         currentCart: orderForm.id,
@@ -86,7 +114,6 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         userType
       },
     })
-
     if (error || !mutationResult.data || !mutationResult.data.newOrderForm) {
       error && console.error(error)
 
@@ -140,6 +167,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   }
 
   useEffect(() => {
+    
     if (
       loading ||
       !data ||
@@ -147,14 +175,14 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
       orderForm?.id === 'default-order-form'
     )
       return
-
+    
     const crossCart = data?.id !== 'default-order-form' && data?.id
-
     if (!crossCart) {
+       if (!initialFetchComplete) return 
       saveCurrentCart({
         variables: {
           userId,
-          orderFormId: orderForm.id,
+          orderFormId: hasItems ? orderForm.id : null,
           userType
         },
       })
@@ -163,7 +191,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
     }
 
     const equalCarts = crossCart === orderForm.id
-
+    
     if (!equalCarts) {
       !isAutomatic && setChallenge(true)
       isAutomatic && handleMerge()
@@ -172,13 +200,14 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
     }
 
     if (!hasItems && !isAutomatic) {
-      saveCurrentCart({
-        variables: {
-          userId,
-          orderFormId: null,
-          userType
-        },
-      })
+      
+      setTimeout(() => {
+        if (!orderForm.items.length) { 
+          saveCurrentCart({
+            variables: { userId, orderFormId: null, userType },
+          })
+        }
+      }, 2000)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, data, hasItems, initialFetchComplete, orderForm.id])
@@ -186,7 +215,10 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   return (
     <>
       {recoveredBannerVisible && (
-        <CartRecoveredBanner onDismiss={() => setRecoveredBannerVisible(false)} />
+        <CartRecoveredBanner 
+          onDismiss={() => setRecoveredBannerVisible(false)} 
+          type={recoveryType}
+        />
       )}
       {challengeActive && !isAutomatic && (
         <ChallengeBlock

@@ -12,5 +12,7 @@
   "admin/cross-device-cart.automatic-toggle-automatic": "Automático",
   "admin/cross-device-cart.automatic-toggle-manual": "Manual",
   "admin/cross-device-cart.automatic-toggle-help-text": "Elija entre el modo Automático o Manual para el cross device cart.",
-  "admin/cross-device-cart.automatic-toggle-explanation": "Cuando se selecciona el modo 'Automático' no se le pedirá al usuario que realice ninguna acción. Si se selecciona el modo 'Manual' el usuario deberá confirmar qué quiere hacer con los artículos que estaban previamente en el carrito."
+  "admin/cross-device-cart.automatic-toggle-explanation": "Cuando se selecciona el modo 'Automático' no se le pedirá al usuario que realice ninguna acción. Si se selecciona el modo 'Manual' el usuario deberá confirmar qué quiere hacer con los artículos que estaban previamente en el carrito.",
+  "store/crossCart.merge.title": "Unimos tus carritos",
+  "store/crossCart.merge.subtitle": "Para que sigas comprando"
 }
