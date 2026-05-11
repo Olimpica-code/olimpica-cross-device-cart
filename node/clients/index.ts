@@ -49,9 +49,9 @@ const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
     default: {
-      retries: 2,
+      retries: 3,
       timeout: TIMEOUT_MS,
-      concurrency: 2,
+      concurrency: 10,
       memoryCache,
     },
   },

@@ -151,13 +151,22 @@ const CartRecoveredBanner: FC<Props> = ({ onDismiss, type }) => {
             className={`${handles.cartRecoveredBannerTitle} fw6`}
             style={messageTextStyle}
           >
-            <FormattedMessage id={type === 'unir' ? "store/crossCart.merge.title" :"store/crossCart.recovered.title" } />
+            {type === 'unir' ? (
+              <FormattedMessage id="store/crossCart.merge.title" />
+            ) : (
+              <FormattedMessage id="store/crossCart.recovered.title" />
+            )}
+            
           </div>
           <div
             className={`${handles.cartRecoveredBannerSubtitle} mt1 c-muted-1`}
             style={messageTextStyle}
           >
-            <FormattedMessage id={type === 'unir' ? "store/crossCart.merge.subtitle" : "store/crossCart.recovered.subtitle"} />
+            {type === 'unir' ? (
+              <FormattedMessage id="store/crossCart.merge.subtitle" />
+            ) : (
+              <FormattedMessage id="store/crossCart.recovered.subtitle" />
+            )}
           </div>
         </div>
         <div
