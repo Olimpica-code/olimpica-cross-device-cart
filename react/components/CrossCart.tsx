@@ -17,19 +17,18 @@ interface Props {
   isAutomatic: boolean
   showToast: (toast: ToastParam) => void
   strategy: Strategy
-  userType: string
+  userType: string,
   salesChannel: string
 }
 
-const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userType,
-    salesChannel }) => {
+const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userType, salesChannel }) => {
   const {
     orderForm,
     initialFetchComplete,
-    setOrderForm
+    setOrderForm,
   } = useOrderForm() as OrderFormContext
   const uniqueUserId = `${userId}_SC${salesChannel}`;
-  const { rootPath = '' } = useRuntime()
+ const { rootPath = '', page } = useRuntime()
 
   const [hasMerged, setMergeStatus] = useState(false)
   const [challengeActive, setChallenge] = useState(false)
@@ -38,13 +37,14 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   const intl = useIntl()
 
   const hasItems = orderForm.items.length
+  
   const [getSavedCart, { data, loading }] = useLazyQuery<
     CrossCartData,
     CrossCartVars
   >(GET_ID_BY_USER, {
-    fetchPolicy: 'no-cache',
+    fetchPolicy: 'no-cache'
   })
-
+  
   const [saveCurrentCart] = useMutation<Success, NewCrossCart>(SAVE_ID_BY_USER)
 
   const [replaceCart, { error, loading: mutationLoading }] = useMutation<
@@ -53,36 +53,43 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   >(MUTATE_CART)
   
   useEffect(() => {
-    
-    if (!userId || !salesChannel) return
-     console.log(uniqueUserId, "uniqueUserId")
-    getSavedCart({
-      variables: {
-        userId: uniqueUserId,
-        nullOnEmpty: !isAutomatic,
-        userType
-      },
-    })
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderForm.id, uniqueUserId, userId])
-  console.log(initialFetchComplete, userId, orderForm.id, orderForm.items.length,"fuera de useeffect")
+    if (page !== 'store.orderplaced') return
+
+    const cleanAndRenewCart = async () => {
+        try {
+            const response = await fetch(
+                insertRootPath(rootPath, '/api/checkout/pub/orderForm?forceNewCart=true')
+            )
+            const newOrderForm = await response.json()
+            
+            await saveCurrentCart({
+                variables: {
+                    userId: uniqueUserId,
+                    orderFormId: newOrderForm.id,
+                    userType,
+                },
+            })
+          setOrderForm(newOrderForm)
+
+        } catch (e) {
+            console.error('[ERROR RENEWING CART]', e)
+        }
+    }
+
+    cleanAndRenewCart()
+
+
+  }, [page])
   useEffect(() => {
-    console.log("entro a useEffect 1")
-  if (!initialFetchComplete) return
- console.log("entro a useEffect")
-  const handleVisibilityChange = async () => {
-    console.log("entro handleVisilityChange")
+    if (!initialFetchComplete || !uniqueUserId) return
+    const handleVisibilityChange = async () => {
     if (document.visibilityState !== 'visible') return
-    console.log("entro handleVisilityChange 1")
-      try {
+    try {
         const response = await axios.get(
           insertRootPath(rootPath, `/api/checkout/pub/orderForm/${orderForm.id}`)
         )
-        console.log("responsedata",response)
         const updatedOrderForm = response.data
         if (updatedOrderForm.items.length > orderForm.items.length) {
-          console.log("entre if")
           setOrderForm(updatedOrderForm)
           setRecoveryType('retomar')
           setRecoveredBannerVisible(true)
@@ -98,13 +105,25 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleVisibilityChange)
     }
-  }, [initialFetchComplete, userId, orderForm.id, orderForm.items.length])
+  }, [initialFetchComplete, uniqueUserId, orderForm.id, orderForm.items.length])
+  
+  useEffect(() => {
+    if (page === 'store.orderplaced') return
+    getSavedCart({
+      variables: {
+        userId:uniqueUserId,
+        nullOnEmpty: !isAutomatic,
+        userType
+      },
+    })
+  }, [])
+  
   const handleDeclineMerge = async () => {
     challengeActive && setChallenge(false)
 
     await saveCurrentCart({
       variables: {
-        userId: uniqueUserId,
+        userId:uniqueUserId,
         orderFormId: hasItems ? orderForm.id : null,
         userType
       },
@@ -112,12 +131,12 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   }
 
   const handleMerge = async () => {
-    console.log("entro a handle merge")
+     
     if (!data?.id || hasMerged) return
-    console.log("entro2 a handle merge")
     const isUnion = orderForm.items.length > 0
     setRecoveryType(isUnion ? 'unir' : 'retomar')
     setMergeStatus(true)
+
     const mutationResult = await replaceCart({
       variables: {
         currentCart: orderForm.id,
@@ -126,6 +145,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         userType
       },
     })
+    
     if (error || !mutationResult.data || !mutationResult.data.newOrderForm) {
       error && console.error(error)
 
@@ -171,7 +191,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
 
     getSavedCart({
       variables: {
-        userId: uniqueUserId,
+        userId:uniqueUserId,
         nullOnEmpty: !isAutomatic,
         userType,
       },
@@ -179,7 +199,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   }
 
   useEffect(() => {
-    
+    if (page === 'store.orderplaced') return
     if (
       loading ||
       !data ||
@@ -187,14 +207,16 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
       orderForm?.id === 'default-order-form'
     )
       return
-    
+
     const crossCart = data?.id !== 'default-order-form' && data?.id
+
+    
     if (!crossCart) {
-       if (!initialFetchComplete) return 
+      
       saveCurrentCart({
         variables: {
-          userId: uniqueUserId,
-          orderFormId: hasItems ? orderForm.id : null,
+          userId:uniqueUserId,
+          orderFormId: orderForm.id,
           userType
         },
       })
@@ -205,27 +227,23 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
     const equalCarts = crossCart === orderForm.id
     
     if (!equalCarts) {
-      if (!isAutomatic) {
-        setChallenge(true)
-      } else {
-        handleMerge()
-      }
+      !isAutomatic && setChallenge(true)
+      isAutomatic && handleMerge()
+
       return
     }
 
     if (!hasItems && !isAutomatic) {
-      
-      setTimeout(() => {
-        if (!orderForm.items.length) { 
-          saveCurrentCart({
-            variables: { userId, orderFormId: null, userType },
-          })
-        }
-      }, 2000)
+      saveCurrentCart({
+        variables: {
+          userId:uniqueUserId,
+          orderFormId: null,
+          userType
+        },
+      })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, data, hasItems, initialFetchComplete, orderForm.id, uniqueUserId])
-
+  }, [loading, data, hasItems, initialFetchComplete, orderForm.id])
+  
   return (
     <>
       {recoveredBannerVisible && (

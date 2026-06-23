@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect } from 'react'
-import { SessionSuccess, useRenderSession } from 'vtex.session-client'
+import { useRenderSession } from 'vtex.session-client'
 import { useOrderForm } from 'vtex.order-manager/OrderForm'
 import { ToastConsumer } from 'vtex.styleguide'
 import { useQuery } from 'react-apollo'
@@ -12,7 +12,6 @@ const SessionWrapper: FC = () => {
   const { userType } = orderForm
  
   const [settings, setAppSettings] = useState({} as AppSettings)
-  
   const { data } = useQuery<AppSettingsData>(getAppSettings, {
     ssr: false,
   })
@@ -24,16 +23,13 @@ const SessionWrapper: FC = () => {
 
     setAppSettings(data.settings)
   }, [data])
-  console.log(session,userType,orderLoading,data,"sessionwrapper")
   if (error || loading || !session || orderLoading || !data) {
     console.log("entro")
     return null
   }
-  console.log("hola")
-  const {
-    namespaces: { profile },
-  } = session as SessionSuccess
-
+  const sessionData = session as any
+  const { profile, store } = sessionData.namespaces
+  const activeSalesChannel = store?.channel?.value || orderForm?.salesChannel?.toString() || "1"
   const { isAutomatic, strategy } = settings
 
   const isAuthenticated = profile?.isAuthenticated.value === 'true'
@@ -41,27 +37,8 @@ const SessionWrapper: FC = () => {
   if (!isAuthenticated) {
     return null
   }
-
+  
   const userId = profile?.id.value
-  console.log(userId,"idusuario")
-  const getSalesChannelFromCookie = () => {
-    try {
-      const segmentCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('vtex_segment='))
-        ?.split('=')[1]
-
-      if (segmentCookie) {
-        const decoded = JSON.parse(atob(segmentCookie))
-        return decoded.channel?.toString()
-      }
-    } catch (e) {
-      console.error('Error al decodificar vtex_segment:', e)
-    }
-    // Fallback por si la cookie falla: mirar el path
-    return window.location.pathname.includes('/flash') ? "5" : "1"
-  }
-  const activeSalesChannel = getSalesChannelFromCookie()
   return (
     <ToastConsumer>
       {({ showToast }: { showToast: (toast: ToastParam) => void }) => (

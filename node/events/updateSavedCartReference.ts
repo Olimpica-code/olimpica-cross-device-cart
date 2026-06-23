@@ -11,23 +11,33 @@ export async function updateSavedCartReference(ctx: StatusChangeContext) {
     vtex: { logger },
     clients: { oms, vbase },
   } = ctx
-
+  logger.info({
+    message: 'updateSavedCartReference ejecutado',
+  })
   if( userType != "CALL_CENTER_OPERATOR") {
-
+    console.log("entro")
+    logger.info({
+    message: 'entro',
+  })
     try {
       const customerOrder = await oms.order(orderId)
-  
+      logger.info({
+        message: 'customerOrder',
+      })
       const {
         orderFormId,
         clientProfileData: { userProfileId },
       } = customerOrder
-  
+      console.log(userProfileId,"userProfileId")
+      logger.info({
+        message: userProfileId,
+      })
       const crossCartReference: string | null = await vbase.getJSON(
         APP_NAME,
         userProfileId,
         true
       )
-  
+      
       if (crossCartReference === orderFormId) {
         await vbase.saveJSON(APP_NAME, userProfileId, null)
   
