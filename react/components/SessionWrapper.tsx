@@ -24,7 +24,6 @@ const SessionWrapper: FC = () => {
     setAppSettings(data.settings)
   }, [data])
   if (error || loading || !session || orderLoading || !data) {
-    console.log("entro")
     return null
   }
   const sessionData = session as any
