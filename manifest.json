@@ -1,7 +1,7 @@
 {
   "vendor": "olimpica",
   "name": "cross-device-cart",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "title": "Cross device cart",
   "description": "Persistencia del carrito de compras o tambien Card Recovery",
   "builders": {
