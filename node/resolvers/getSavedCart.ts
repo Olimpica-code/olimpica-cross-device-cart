@@ -12,11 +12,10 @@ export const getSavedCart = async (
   { clients: { vbase, checkoutIO } }: Context
 ): Promise<string | null> => {
   const orderFormId: string | null = await vbase.getJSON(APP_NAME, userId, true)
-
+  
   if( userType != "CALL_CENTER_OPERATOR") {
     if (nullOnEmpty && orderFormId) {
       const savedItems = await checkoutIO.getItems(orderFormId)
-  
       if (!savedItems.length) {
         return null
       }

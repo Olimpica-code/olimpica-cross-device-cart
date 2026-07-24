@@ -69,6 +69,8 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
                     userType,
                 },
             })
+
+          
           setOrderForm(newOrderForm)
 
         } catch (e) {
@@ -116,7 +118,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         userType
       },
     })
-  }, [])
+  }, [uniqueUserId])
   
   const handleDeclineMerge = async () => {
     challengeActive && setChallenge(false)
@@ -131,21 +133,33 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   }
 
   const handleMerge = async () => {
-     
     if (!data?.id || hasMerged) return
+
+    const preMergeOrderFormId = orderForm.id
+    const preMergeItemIds = new Set(orderForm.items.map(i => i.id))
     const isUnion = orderForm.items.length > 0
-    setRecoveryType(isUnion ? 'unir' : 'retomar')
+    const arrItems = orderForm?.items ?? [];
+    const isArrastrandoCarroDeOtraTienda = arrItems.some(() => {
+      
+      if (String(salesChannel) === "5" ) return true;
+      if (String(salesChannel) === "1" ) return true; 
+      return false;
+    });
+
+    const finalRecoveryType = isArrastrandoCarroDeOtraTienda ? 'retomar' : (isUnion ? 'unir' : 'retomar');
+    const finalStrategy = isArrastrandoCarroDeOtraTienda ? 'COMBINE' : strategy;
+    
+    setRecoveryType(finalRecoveryType)
     setMergeStatus(true)
 
     const mutationResult = await replaceCart({
       variables: {
         currentCart: orderForm.id,
         savedCart: data.id,
-        strategy,
+        strategy: finalStrategy,
         userType
       },
     })
-    
     if (error || !mutationResult.data || !mutationResult.data.newOrderForm) {
       error && console.error(error)
 
@@ -155,36 +169,33 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
 
       return
     }
-
+    let { newOrderForm } = mutationResult.data
+    
     try {
-      const orderFormURLWithRootPath = insertRootPath(
-        rootPath,
-        `/api/checkout/pub/orderForm/${data.id}`
+      const { data: latestTransientCart } = await axios.get(
+        insertRootPath(rootPath, `/api/checkout/pub/orderForm/${preMergeOrderFormId}`)
+      )
+      const itemsAddedDuringMerge = (latestTransientCart?.items ?? []).filter(
+        (item:any) => !preMergeItemIds.has(item.id)
       )
 
-      await axios.post(
-        orderFormURLWithRootPath,
-        {},
-        {
-          headers: {
-            'set-cookie': `checkout.vtex.com=__ofid=${data.id}`,
-          },
-        }
-      )
+      if (itemsAddedDuringMerge.length > 0) {
+        const { data: reconciledOrderForm } = await axios.post(
+          insertRootPath(rootPath, `/api/checkout/pub/orderForm/${newOrderForm.id}/items`),
+          {
+            orderItems: itemsAddedDuringMerge.map((item:any) => ({
+              id: item.id,
+              seller: item.seller,
+              quantity: item.quantity,
+            })),
+          }
+        )
+        newOrderForm = reconciledOrderForm
+      }
     } catch (e) {
-      challengeActive && setChallenge(false)
-
-      showToast({
-        message: intl.formatMessage({ id: 'store/crossCart.toast.error' }),
-      })
-
-      return
+      console.error('[ERROR RECONCILIANDO ITEMS AGREGADOS DURANTE EL MERGE]', e)
     }
-
-    const { newOrderForm } = mutationResult.data
-
     setOrderForm(newOrderForm)
-
     challengeActive && setChallenge(false)
 
     setRecoveredBannerVisible(true)
@@ -210,12 +221,10 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
 
     const crossCart = data?.id !== 'default-order-form' && data?.id
 
-    
     if (!crossCart) {
-      
       saveCurrentCart({
         variables: {
-          userId:uniqueUserId,
+          userId: uniqueUserId,
           orderFormId: orderForm.id,
           userType
         },

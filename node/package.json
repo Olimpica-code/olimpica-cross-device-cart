@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "@vtex/api": "6.50.1",
+    "@vtex/api": "6.51.0",
     "@vtex/clients": "^2.17.0",
     "cookie": "^0.4.2"
   },
   "devDependencies": {
     "@types/cookie": "^0.3.2",
-    "@vtex/api": "6.50.1",
+    "@vtex/api": "6.51.0",
     "@vtex/test-tools": "vtex/test-tools",
     "@vtex/tsconfig": "^0.5.6",
     "olimpica.cross-device-cart": "https://mergecarrito--olimpica.myvtex.com/_v/private/typings/linked/v1/olimpica.cross-device-cart@0.1.0+build1777050493/public/@types/olimpica.cross-device-cart",

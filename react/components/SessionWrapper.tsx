@@ -12,10 +12,9 @@ const SessionWrapper: FC = () => {
   const { userType } = orderForm
  
   const [settings, setAppSettings] = useState({} as AppSettings)
-  const { data } = useQuery<AppSettingsData>(getAppSettings, {
+  const { data} = useQuery<AppSettingsData>(getAppSettings, {
     ssr: false,
   })
- 
   useEffect(() => {
     if (!data) {
       return
@@ -23,6 +22,7 @@ const SessionWrapper: FC = () => {
 
     setAppSettings(data.settings)
   }, [data])
+  
   if (error || loading || !session || orderLoading || !data) {
     return null
   }
@@ -32,12 +32,12 @@ const SessionWrapper: FC = () => {
   const { isAutomatic, strategy } = settings
 
   const isAuthenticated = profile?.isAuthenticated.value === 'true'
-
-  if (!isAuthenticated) {
+   if (!isAuthenticated) {
     return null
   }
   
   const userId = profile?.id.value
+  
   return (
     <ToastConsumer>
       {({ showToast }: { showToast: (toast: ToastParam) => void }) => (
