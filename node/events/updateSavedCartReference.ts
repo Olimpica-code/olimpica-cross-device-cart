@@ -15,7 +15,6 @@ export async function updateSavedCartReference(ctx: StatusChangeContext) {
     message: 'updateSavedCartReference ejecutado',
   })
   if( userType != "CALL_CENTER_OPERATOR") {
-    console.log("entro")
     logger.info({
     message: 'entro',
   })
@@ -28,7 +27,6 @@ export async function updateSavedCartReference(ctx: StatusChangeContext) {
         orderFormId,
         clientProfileData: { userProfileId },
       } = customerOrder
-      console.log(userProfileId,"userProfileId")
       logger.info({
         message: userProfileId,
       })
