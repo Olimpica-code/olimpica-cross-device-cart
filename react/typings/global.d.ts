@@ -4,6 +4,10 @@ interface OrderFormContext {
   initialFetchComplete: boolean
 }
 
+interface Window {
+  dataLayer?: Array<Record<string, unknown>>
+}
+
 interface ToastParam {
   message: string
   duration?: number

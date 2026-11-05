@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect, useRef, useState } from 'react'
 import { useLazyQuery, useMutation } from 'react-apollo'
 import { useIntl } from 'react-intl'
 import { useRuntime } from 'vtex.render-runtime'
@@ -34,6 +34,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
   const [challengeActive, setChallenge] = useState(false)
   const [recoveredBannerVisible, setRecoveredBannerVisible] = useState(false)
   const [recoveryType, setRecoveryType] = useState<'retomar' | 'unir'>('retomar')
+  const trackedRecoveries = useRef(new Set<string>())
   const intl = useIntl()
 
   const hasItems = orderForm.items.length
@@ -170,6 +171,7 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
       return
     }
     let { newOrderForm } = mutationResult.data
+    let reconciliationSucceeded = true
     
     try {
       const { data: latestTransientCart } = await axios.get(
@@ -193,9 +195,44 @@ const CrossCart: FC<Props> = ({ userId, isAutomatic, strategy, showToast, userTy
         newOrderForm = reconciledOrderForm
       }
     } catch (e) {
+      reconciliationSucceeded = false
       console.error('[ERROR RECONCILIANDO ITEMS AGREGADOS DURANTE EL MERGE]', e)
     }
     setOrderForm(newOrderForm)
+
+    if (
+      reconciliationSucceeded &&
+      !mutationResult.errors?.length &&
+      typeof newOrderForm?.id === 'string' &&
+      newOrderForm.id.trim().length > 0 &&
+      newOrderForm.id !== 'default-order-form' &&
+      Array.isArray(newOrderForm.items) &&
+      newOrderForm.items.length > 0 &&
+      typeof window !== 'undefined'
+    ) {
+      const recoveryKey = JSON.stringify([
+        uniqueUserId,
+        preMergeOrderFormId,
+        newOrderForm.id,
+      ])
+
+      if (!trackedRecoveries.current.has(recoveryKey)) {
+        try {
+          window.dataLayer = window.dataLayer || []
+
+          if (typeof window.dataLayer.push === 'function') {
+            trackedRecoveries.current.add(recoveryKey)
+            window.dataLayer.push({
+              event: 'EventoRecuperarCarrito',
+              pagePath: window.location.href,
+            })
+          }
+        } catch (e) {
+          console.error('[ERROR TRACKING RECUPERACION DE CARRITO]', e)
+        }
+      }
+    }
+
     challengeActive && setChallenge(false)
 
     setRecoveredBannerVisible(true)
